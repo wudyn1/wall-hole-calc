@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>墙洞附加筋计算器 v4.0 - 台山核电</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3c72">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="洞口附加筋">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Microsoft YaHei","微软雅黑",sans-serif;background:linear-gradient(135deg,#1a3a5c 0%,#2d6a8f 50%,#1a3a5c 100%);min-height:100vh;padding:16px}
+.container{max-width:1100px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,.4);overflow:hidden}
+.header{background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:20px;margin-bottom:2px}
+.header p{opacity:.8;font-size:12px}
+.ver{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:16px;padding:4px 14px;font-size:13px;font-weight:700}
+.contact{background:#fff8e1;border-bottom:2px solid #ffc107;padding:6px 24px;font-size:12px;color:#5d4037;display:flex;align-items:center;gap:8px}
+.contact .logo{width:28px;height:28px;background:#1565c0;border-radius:5px;color:#fff;font-weight:900;font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.contact .brand{font-weight:700;color:#0d47a1;font-size:14px}
+.tabs{display:flex;background:#f0f4f8;border-bottom:2px solid #d0dce8}
+.tab{padding:10px 16px;cursor:pointer;border:none;background:transparent;font-size:13px;color:#5a6a7a;transition:all .2s;border-bottom:3px solid transparent;margin-bottom:-2px;font-family:inherit}
+.tab:hover{background:#e0e8f0}
+.tab.active{color:#1e3c72;border-bottom-color:#2a5298;font-weight:700;background:#fff}
+.content{padding:24px}
+.module{display:none}
+.module.active{display:block}
+h2{color:#1e3c72;margin-bottom:12px;font-size:17px}
+.sec{background:linear-gradient(135deg,#e8eef4,#dde6f0);border-left:4px solid #2a5298;padding:8px 14px;border-radius:5px;margin-bottom:14px;font-size:12px;color:#1e3c72;font-weight:700}
+.form-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.form-group{flex:1;min-width:120px;margin-bottom:0}
+.form-group label{display:block;margin-bottom:5px;font-weight:700;color:#2c3e50;font-size:12px}
+input,select{width:100%;padding:8px 10px;border:2px solid #cdd8e4;border-radius:6px;font-size:13px;font-family:inherit;transition:border-color .2s;background:#fff}
+input:focus,select:focus{outline:none;border-color:#2a5298;box-shadow:0 0 0 3px rgba(42,82,152,.1)}
+.btn{background:linear-gradient(135deg,#2a5298,#1e3c72);color:#fff;border:none;padding:12px 36px;border-radius:8px;font-size:15px;cursor:pointer;font-weight:700;font-family:inherit;transition:transform .2s,box-shadow .2s;margin-top:6px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(42,82,152,.4)}
+.result{margin-top:20px}
+.rbox{background:linear-gradient(135deg,#f8fafc,#eef3f8);border-radius:10px;border-left:5px solid #2a5298;padding:18px;margin-bottom:12px}
+.rbox h3{color:#1e3c72;margin-bottom:12px;font-size:15px;border-bottom:1px solid #d0dce8;padding-bottom:6px}
+.ri{background:#fff;border-radius:5px;padding:8px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;border:1px solid #e8eef4}
+.rl{font-weight:700;color:#5a6a7a;font-size:12px;min-width:120px;padding-top:2px}
+.rv{font-size:13px;color:#2c3e50;flex:1;line-height:1.6}
+.rv strong{color:#1e3c72}
+.rv .phi{font-weight:700;color:#c0392b}
+.hl{background:linear-gradient(135deg,#fff8e1,#fff3cd);border:1px solid #ffe082;border-radius:6px;padding:10px 14px;margin-top:12px;font-size:12px;color:#5d4037;line-height:1.6}
+.hl strong{color:#bf360c}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
+th,td{padding:7px 10px;border:1px solid #cdd8e4;text-align:left}
+th{background:#2a5298;color:#fff;font-weight:700}
+tr:nth-child(even) td{background:#f4f8fc}
+.note{background:#e3f2fd;border:1px solid #90caf9;padding:10px 14px;border-radius:6px;margin-top:14px;font-size:12px;color:#0d47a1;line-height:1.6}
+.note strong{color:#1a237e}
+.lenbox{background:#fef9e7;border:1px solid #ffd54f;border-radius:6px;padding:10px 14px;margin-top:10px;font-size:12px;color:#e65100;line-height:1.8}
+.lenbox strong{color:#bf360c}
+hr.sep{border:none;border-top:1px solid #e0e8f0;margin:16px 0}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.tag-blue{background:#e3f2fd;color:#1565c0;border:1px solid #90caf9}
+.tag-green{background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7}
+.tag-yellow{background:#fff8e1;color:#f57f17;border:1px solid #ffe082}
+.tag-red{background:#ffebee;color:#c62828;border:1px solid #ef9a9a}
+.placeholder{background:#f5f5f5;border:2px dashed #ccc;border-radius:8px;padding:20px;text-align:center;color:#999;font-size:13px;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div><h1>墙洞附加筋计算器</h1><p>台山核电二期 · 核岛厂房配筋典型大样图</p></div>
+    <div class="ver">v4.0</div>
+  </div>
+  <div class="contact">
+    <div class="logo">中振</div>
+    <div><span class="brand">深圳中振</span> · 发现问题请联系益哥 13249304389</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(1,event)">矩形洞口</button>
+    <button class="tab" onclick="switchTab(2,event)">圆形洞口</button>
+    <button class="tab" onclick="switchTab(3,event)">门企口</button>
+  </div>
+  <div class="content">
+
+<!-- ========== Module 1: 矩形洞口 ========== -->
+<div class="module active" id="mod1">
+  <h2>矩形洞口附加筋计算</h2>
+  <div class="sec">洞口尺寸</div>
+  <div class="form-row">
+    <div class="form-group"><label>洞口宽度 D1 (mm) · 竖向主筋被截断方向</label><input type="number" id="m1_dw" value="400" min="50" max="3000"></div>
+    <div class="form-group"><label>洞口高度 D2 (mm) · 横向主筋被截断方向</label><input type="number" id="m1_dh" value="400" min="50" max="3000"></div>
+  </div>
+  <div class="sec">材料参数</div>
+  <div class="form-row">
+    <div class="form-group"><label>混凝土等级</label><select id="m1_fc"><option>C30</option><option>C35</option><option>C40</option><option selected>C45</option><option>C50</option></select></div>
+    <div class="form-group"><label>保护层 C (mm)</label><select id="m1_c"><option>50</option><option selected>60</option><option>70</option><option>80</option></select></div>
+    <div class="form-group"><label>墙厚 Thk (mm)</label><select id="m1_thk"><option selected>400</option><option>500</option><option>600</option><option>700</option><option>800</option><option>1000</option><option>1200</option><option>1500</option></select></div>
+    <div class="form-group"><label>主筋间距 (mm)</label><input type="number" id="m1_s" value="200" min="100" max="300"></div>
+  </div>
+  <hr class="sep">
+  <div class="sec">1L/3L 横向主筋（沿宽度D1方向布置，被洞口高度D2截断）</div>
+  <div class="form-row">
+    <div class="form-group"><label>1L（外侧横向）直径</label><select id="m1_h1d"><option>12</option><option>14</option><option selected>16</option><option>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+    <div class="form-group"><label>3L（内侧横向）直径</label><select id="m1_h2d"><option value="0">无</option><option>12</option><option>14</option><option selected>16</option><option>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+  </div>
+  <div class="sec">2L/4L 竖向主筋（沿高度D2方向布置，被洞口宽度D1截断）</div>
+  <div class="form-row">
+    <div class="form-group"><label>2L（外侧竖向）直径</label><select id="m1_v1d"><option>12</option><option>14</option><option selected>16</option><option>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+    <div class="form-group"><label>4L（内侧竖向）直径</label><select id="m1_v2d"><option value="0">无</option><option>12</option><option>14</option><option selected>16</option><option>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+  </div>
+  <button class="btn" onclick="calcRect()">计算洞口附加筋</button>
+  <div id="r1"></div>
+</div>
+
+<!-- ========== Module 2: 圆形洞口 ========== -->
+<div class="module" id="mod2">
+  <h2>圆形洞口附加筋计算</h2>
+  <div class="sec">洞口尺寸</div>
+  <div class="form-row">
+    <div class="form-group"><label>洞口直径 D (mm)</label><input type="number" id="m2_d" value="300" min="50" max="2000"></div>
+  </div>
+  <div class="sec">材料参数</div>
+  <div class="form-row">
+    <div class="form-group"><label>混凝土等级</label><select id="m2_fc"><option>C30</option><option>C35</option><option>C40</option><option selected>C45</option><option>C50</option></select></div>
+    <div class="form-group"><label>保护层 C (mm)</label><select id="m2_c"><option>50</option><option selected>60</option><option>70</option><option>80</option></select></div>
+    <div class="form-group"><label>墙厚 Thk (mm)</label><select id="m2_thk"><option selected>400</option><option>500</option><option>600</option><option>700</option><option>800</option><option>1000</option><option>1200</option><option>1500</option></select></div>
+    <div class="form-group"><label>主筋间距 (mm)</label><input type="number" id="m2_s" value="200" min="100" max="300"></div>
+  </div>
+  <hr class="sep">
+  <div class="sec">1L/3L 横向主筋（沿水平方向布置）</div>
+  <div class="form-row">
+    <div class="form-group"><label>1L（外侧横向）直径</label><select id="m2_h1d"><option>12</option><option>14</option><option selected>16</option><option>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+    <div class="form-group"><label>3L（内侧横向）直径</label><select id="m2_h2d"><option value="0">无</option><option>12</option><option>14</option><option selected>16</option><option>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+  </div>
+  <div class="sec">2L/4L 竖向主筋（沿竖直方向布置）</div>
+  <div class="form-row">
+    <div class="form-group"><label>2L（外侧竖向）直径</label><select id="m2_v1d"><option>12</option><option>14</option><option selected>16</option><option>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+    <div class="form-group"><label>4L（内侧竖向）直径</label><select id="m2_v2d"><option value="0">无</option><option>12</option><option>14</option><option selected>16</option><option>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+  </div>
+  <button class="btn" onclick="calcCircle()">计算洞口附加筋</button>
+  <div id="r2"></div>
+</div>
+
+<!-- ========== Module 3: 门企口 ========== -->
+<div class="module" id="mod3">
+  <h2>门企口附加筋计算</h2>
+  <div class="sec">洞口尺寸</div>
+  <div class="form-row">
+    <div class="form-group"><label>洞口宽度 D1 (mm)</label><input type="number" id="m3_dw" value="900" min="50" max="3000"></div>
+    <div class="form-group"><label>洞口高度 D2 (mm)</label><input type="number" id="m3_dh" value="2100" min="50" max="4000"></div>
+  </div>
+  <div class="sec">材料参数</div>
+  <div class="form-row">
+    <div class="form-group"><label>混凝土等级</label><select id="m3_fc"><option>C30</option><option>C35</option><option>C40</option><option selected>C45</option><option>C50</option></select></div>
+    <div class="form-group"><label>保护层 C (mm)</label><select id="m3_c"><option>50</option><option selected>60</option><option>70</option><option>80</option></select></div>
+    <div class="form-group"><label>墙厚 Thk (mm)</label><select id="m3_thk"><option selected>400</option><option>500</option><option>600</option><option>700</option><option>800</option><option>1000</option><option>1200</option><option>1500</option></select></div>
+    <div class="form-group"><label>主筋间距 (mm)</label><input type="number" id="m3_s" value="200" min="100" max="300"></div>
+  </div>
+  <hr class="sep">
+  <div class="sec">1L/3L 横向主筋（沿宽度D1方向布置，被洞口高度D2截断）</div>
+  <div class="form-row">
+    <div class="form-group"><label>1L（外侧横向）直径</label><select id="m3_h1d"><option>12</option><option>14</option><option>16</option><option selected>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+    <div class="form-group"><label>3L（内侧横向）直径</label><select id="m3_h2d"><option value="0">无</option><option>12</option><option>14</option><option>16</option><option selected>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+  </div>
+  <div class="sec">2L/4L 竖向主筋（沿高度D2方向布置，被洞口宽度D1截断）</div>
+  <div class="form-row">
+    <div class="form-group"><label>2L（外侧竖向）直径</label><select id="m3_v1d"><option>12</option><option>14</option><option>16</option><option selected>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+    <div class="form-group"><label>4L（内侧竖向）直径</label><select id="m3_v2d"><option value="0">无</option><option>12</option><option>14</option><option>16</option><option selected>18</option><option>20</option><option>22</option><option>25</option><option>28</option><option>32</option></select></div>
+  </div>
+  <button class="btn" onclick="calcDoor()">计算洞口附加筋</button>
+  <div id="r3"></div>
+</div>
+
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 核岛锚固搭接数据表（C45 / HRB400E）
+// ============================================================
+var anchData = {
+  12:{La:391,Lo:469}, 14:{La:456,Lo:547}, 16:{La:521,Lo:625},
+  18:{La:586,Lo:703}, 20:{La:651,Lo:781}, 22:{La:716,Lo:859},
+  25:{La:814,Lo:977}, 28:{La:913,Lo:1096}, 32:{La:1042,Lo:1250},
+  36:{La:1172,Lo:1406}
+};
+
+function nearestKey(d) {
+  var keys = Object.keys(anchData).map(Number).sort(function(a,b){return a-b});
+  var best = keys[0];
+  for (var i = 0; i < keys.length; i++) { if (keys[i] <= d) best = keys[i]; else break; }
+  return best;
+}
+
+function getLaLo(d) {
+  var k = nearestKey(d);
+  return anchData[k] || {La: Math.round(d*30), Lo: Math.round(d*36)};
+}
+
+function switchTab(n, ev) {
+  var mods = document.querySelectorAll('.module');
+  var tabs = document.querySelectorAll('.tab');
+  for (var i = 0; i < mods.length; i++) mods[i].classList.remove('active');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  document.getElementById('mod' + n).classList.add('active');
+  ev.target.classList.add('active');
+}
+
+function getCutCount(dim, spacing) { return Math.ceil(dim / spacing); }
+function getReinCount(cutCount, isSmall) { return isSmall ? 1 : Math.ceil(cutCount / 2); }
+function getUBarDia(mainD) { if (mainD >= 32) return 20; if (mainD >= 16) return 16; return mainD; }
+function getPinDm(d) { if (d < 16) return 4 * d; if (d < 32) return 6 * d; return 8 * d; }
+function getLatRows(thk) { if (thk < 400) return 0; if (thk < 700) return 1; if (thk < 1000) return 2; if (thk <= 1200) return 3; return -1; }
+function getLatDia(D, mainD) { if (D <= 300) return 0; if (D < 500) return 20; return mainD; }
+function tag(text, cls) { return '<span class="tag ' + cls + '">' + text + '</span>'; }
+
+function calcReinforcement(prefix, Dw, Dh, Thk, C, spacing, h1D, h2D, v1D, v2D) {
+  var h2Has = h2D > 0, v2Has = v2D > 0;
+  var isSmallW = Dw <= 300, isSmallH = Dh <= 300;
+  var hMaxD = h2Has ? Math.max(h1D, h2D) : h1D;
+  var vMaxD = v2Has ? Math.max(v1D, v2D) : v1D;
+  var cH = getCutCount(Dh, spacing), cV = getCutCount(Dw, spacing);
+  var bH1 = getReinCount(cH, isSmallH), bH2 = h2Has ? getReinCount(cH, isSmallH) : 0;
+  var bV1 = getReinCount(cV, isSmallW), bV2 = v2Has ? getReinCount(cV, isSmallW) : 0;
+  var extH1 = getLaLo(h1D).Lo + 200, extH2 = h2Has ? getLaLo(h2D).Lo + 200 : 0;
+  var extV1 = getLaLo(v1D).Lo + 200, extV2 = v2Has ? getLaLo(v2D).Lo + 200 : 0;
+  var lenH1 = Dh + 2 * extH1, lenH2 = h2Has ? Dh + 2 * extH2 : 0;
+  var lenV1 = Dw + 2 * extV1, lenV2 = v2Has ? Dw + 2 * extV2 : 0;
+  var uBars = [];
+  if (!isSmallH || !isSmallW) {
+    var u1d=getUBarDia(h1D),u1Dm=getPinDm(u1d),u1La=getLaLo(u1d).La,u1Arc=Math.round(u1Dm/2+u1d),u1Side=u1La+u1Arc,u1Bot=Math.round(Thk-2*C),u1Total=u1Bot+2*u1Side;
+    uBars.push({label:'1L\uff08\u5916\u4fa7\u6a2a\u5411\uff09',mainD:h1D,uDia:u1d,uDm:u1Dm,uLa:u1La,arc:u1Arc,side:u1Side,bot:u1Bot,total:u1Total,count:cH,needed:!isSmallH});
+    var u2d=getUBarDia(v1D),u2Dm=getPinDm(u2d),u2La=getLaLo(u2d).La,u2Arc=Math.round(u2Dm/2+u2d),u2Side=u2La+u2Arc,u2Bot=Math.round(Thk-2*C-2*h1D),u2Total=u2Bot+2*u2Side;
+    uBars.push({label:'2L\uff08\u5916\u4fa7\u7ad6\u5411\uff09',mainD:v1D,uDia:u2d,uDm:u2Dm,uLa:u2La,arc:u2Arc,side:u2Side,bot:u2Bot,total:u2Total,count:cV,needed:!isSmallW});
+    if (h2Has){var u3d=getUBarDia(h2D),u3Dm=getPinDm(u3d),u3La=getLaLo(u3d).La,u3Arc=Math.round(u3Dm/2+u3d),u3Side=u3La+u3Arc,u3Bot=Math.round(Thk-2*C-2*h1D-2*v1D),u3Total=u3Bot+2*u3Side;uBars.push({label:'3L\uff08\u5185\u4fa7\u6a2a\u5411\uff09',mainD:h2D,uDia:u3d,uDm:u3Dm,uLa:u3La,arc:u3Arc,side:u3Side,bot:u3Bot,total:u3Total,count:cH,needed:!isSmallH});}
+    if (v2Has){var u4d=getUBarDia(v2D),u4Dm=getPinDm(u4d),u4La=getLaLo(u4d).La,u4Arc=Math.round(u4Dm/2+u4d),u4Side=u4La+u4Arc,u4Bot=Math.round(Thk-2*C-2*h1D-2*v1D-2*(h2Has?h2D:0)),u4Total=u4Bot+2*u4Side;uBars.push({label:'4L\uff08\u5185\u4fa7\u7ad6\u5411\uff09',mainD:v2D,uDia:u4d,uDm:u4Dm,uLa:u4La,arc:u4Arc,side:u4Side,bot:u4Bot,total:u4Total,count:cV,needed:!isSmallW});}
+  }
+  var latR=getLatRows(Thk),latHDia=getLatDia(Dw,hMaxD),latVDia=getLatDia(Dh,vMaxD);
+  var html='';
+  html+='<div class="rbox"><h3>\u9644\u52a0\u52a0\u5f3a\u7b4b</h3>';
+  html+='<div class="ri"><div class="rl">\u5224\u65ad\u4f9d\u636e</div><div class="rv">D1='+Dw+'mm \u2192 '+(isSmallW>tag('D\u2264300','tag-green'):tag('D>300','tag-yellow'))+' \u3000D2='+Dh+'mm \u2192 '+(isSmallH>tag('D\u2264300','tag-green'):tag('D>300','tag-yellow'))+'</div></div>';
+  html+='<table><tr><th>\u94a2\u7b4b\u5c42</th><th>\u76f4\u5f84</th><th>\u622a\u65ad\u6570</th><th>\u6bcf\u4fa7\u6839\u6570</th><th>\u4ef6\u6570</th><th>\u4f38\u51fa\u957f\u5ea6</th><th>\u5355\u6839\u603b\u957f</th></tr>';
+  html+='<tr><td colspan="7" style="background:#1565c0;color:#fff;font-weight:700;">\u6a2a\u5411\uff08\u88abD2='+Dh+'mm\u622a\u65ad\uff09</td></tr>';
+  html+='<tr><td>1L\uff08\u5916\u4fa7\u6a2a\u5411\uff09</td><td><span class="phi">\u03c6'+h1D+'</span></td><td>'+cH+'</td><td>'+bH1+'\u6839/\u4fa7</td><td>'+(bH1*2)+'\u4ef6</td><td>'+extH1+'mm</td><td><strong>'+lenH1+'mm</strong></td></tr>';
+  if(h2Has)html+='<tr><td>3L\uff08\u5185\u4fa7\u6a2a\u5411\uff09</td><td><span class="phi">\u03c6'+h2D+'</span></td><td>'+cH+'</td><td>'+bH2+'\u6839/\u4fa7</td><td>'+(bH2*2)+'\u4ef6</td><td>'+extH2+'mm</td><td><strong>'+lenH2+'mm</strong></td></tr>';
+  html+='<tr><td colspan="7" style="background:#1565c0;color:#fff;font-weight:700;">\u7ad6\u5411\uff08\u88abD1='+Dw+'mm\u622a\u65ad\uff09</td></tr>';
+  html+='<tr><td>2L\uff08\u5916\u4fa7\u7ad6\u5411\uff09</td><td><span class="phi">\u03c6'+v1D+'</span></td><td>'+cV+'</td><td>'+bV1+'\u6839/\u4fa7</td><td>'+(bV1*2)+'\u4ef6</td><td>'+extV1+'mm</td><td><strong>'+lenV1+'mm</strong></td></tr>';
+  if(v2Has)html+='<tr><td>4L\uff08\u5185\u4fa7\u7ad6\u5411\uff09</td><td><span class="phi">\u03c6'+v2D+'</span></td><td>'+cV+'</td><td>'+bV2+'\u6839/\u4fa7</td><td>'+(bV2*2)+'\u4ef6</td><td>'+extV2+'mm</td><td><strong>'+lenV2+'mm</strong></td></tr>';
+  html+='</table>';
+  html+='<div class="hl"><strong>\u516c\u5f0f\uff1a</strong>\u5355\u6839\u603b\u957f = \u672c\u8fb9\u5c3a\u5bf8 + 2\u00d7(Lo+200)\uff0cLo\u67e5\u951a\u56fa\u62c9\u63a5\u8868\u3002\u76f4\u5f84\u540c\u88ab\u622a\u65ad\u4fa7\u4e3b\u7b4b\u3002</div></div>';
+  html+='<div class="rbox" style="border-left-color:#e65100;"><h3 style="color:#bf360c;">U\u5f62\u7b4b</h3>';
+  if(uBars.length===0){html+='<div class="ri"><div class="rv" style="color:#888;">D1\u2264300\u4e14D2\u2264300\uff0c\u4e0d\u8bbeU\u5f62\u7b4b</div></div>';}
+  else{uBars.forEach(function(u){if(!u.needed)return;var diaDesc=u.mainD>=32?'\u4e3b\u7b4b\u2265\u03c632\u2192\u03c620':(u.mainD>=16?'\u4e3b\u7b4b\u2265\u03c616\u2192\u03c616':'\u4e3b\u7b4b<\u03c616\u2192\u540c\u4e3b\u7b4b');html+='<div class="ri"><div class="rl">'+u.label+'</div><div class="rv"><strong>\u03c6'+u.uDia+'</strong>\uff08'+diaDesc+'\uff09\u00b7 <strong>'+u.count+'\u6839</strong><br>\u8fb9\u957f = La('+u.uLa+') + \u5f2f\u5f27(Dm/2+d='+u.arc+') = <strong>'+u.side+'mm</strong><br>\u5e95\u957f = <strong>'+u.bot+'mm</strong><br>\u603b\u957f = '+u.bot+' + 2\u00d7'+u.side+' = <strong>'+u.total+'mm</strong></div></div>';});html+='<div class="hl"><strong>\u516c\u5f0f\uff1a</strong>\u603b\u957f = \u5e95\u957f + 2\u00d7\u8fb9\u957f\uff0c\u8fb9\u957f = La + Dm/2 + d\u3002\u5e95\u957f\u9012\u51cf\uff1a1L=Thk-2C\uff0c2L\u518d\u51cf2\u00d7d(1L)\uff0c\u4ee5\u6b64\u7c7b\u63a8\u3002</div>';}
+  html+='</div>';
+  html+='<div class="rbox" style="border-left-color:#6a1b9a;"><h3 style="color:#6a1b9a;">\u4fa7\u5411\u6784\u9020\u7b4b</h3>';
+  if(latR===0){html+='<div class="ri"><div class="rv" style="color:#888;">\u5899\u539aThk='+Thk+'<400mm\uff0c\u4e0d\u8bbe\u4fa7\u5411\u6784\u9020\u7b4b</div></div>';}
+  else{var latRText=latR===-1?'\u95f4\u8ddd250mm\uff08Thk>1200\uff09':latR+'\u6839/\u4fa7';html+='<div class="ri"><div class="rl">\u6392\u6570/\u95f4\u8ddd</div><div class="rv"><strong>'+latRText+'</strong>\uff08\u5899\u539aThk='+Thk+'mm\uff09</div></div>';
+  if(isSmallW||latHDia===0){html+='<div class="ri"><div class="rl">\u6a2a\u5411\uff08\u6cbfD1\u8fb9\uff09</div><div class="rv" style="color:#888;"><strong>\u4e0d\u8bbe</strong>\uff08D1='+Dw+'mm\u2264300\uff09</div></div>';}else{var latHLa=getLaLo(latHDia).La,latHLen=Dw+2*latHLa;html+='<div class="ri"><div class="rl">\u6a2a\u5411\uff08\u6cbfD1\u8fb9\uff09</div><div class="rv"><strong>\u03c6'+latHDia+'</strong>\uff08D1='+Dw+'mm\uff0c'+(Dw<500?'300<D<500\u2192\u03c620':'D\u2265500\u2192\u540c\u4e3b\u7b4b')+'\uff09<br>\u5355\u6839\u603b\u957f = '+Dw+' + 2\u00d7La('+latHLa+') = <strong>'+latHLen+'mm</strong></div></div>';}
+  if(isSmallH||latVDia===0){html+='<div class="ri"><div class="rl">\u7ad6\u5411\uff08\u6cbfD2\u8fb9\uff09</div><div class="rv" style="color:#888;"><strong>\u4e0d\u8bbe</strong>\uff08D2='+Dh+'mm\u2264300\uff09</div></div>';}else{var latVLa=getLaLo(latVDia).La,latVLen=Dh+2*latVLa;html+='<div class="ri"><div class="rl">\u7ad6\u5411\uff08\u6cbfD2\u8fb9\uff09</div><div class="rv"><strong>\u03c6'+latVDia+'</strong>\uff08D2='+Dh+'mm\uff0c'+(Dh<500?'300<D<500\u2192\u03c620':'D\u2265500\u2192\u540c\u4e3b\u7b4b')+'\uff09<br>\u5355\u6839\u603b\u957f = '+Dh+' + 2\u00d7La('+latVLa+') = <strong>'+latVLen+'mm</strong></div></div>';}
+  html+='<div class="hl"><strong>\u516c\u5f0f\uff1a</strong>\u5355\u6839\u603b\u957f = \u672c\u65b9\u5411\u5c3a\u5bf8 + 2\u00d7La\uff0cLa\u67e5\u951a\u56fa\u62c9\u63a5\u8868\u3002</div>';}
+  html+='</div>';
+  html+='<div class="lenbox"><strong>\u603b\u957f\u5ea6\u6c47\u603b\uff1a</strong><br>';
+  html+='\u2022 1L\u52a0\u5f3a\u7b4b\uff1aD2('+Dh+') + 2\u00d7(Lo+200) = <strong>'+lenH1+'mm</strong>\uff08\u03c6'+h1D+'\uff0c'+bH1+'\u6839/\u4fa7\u00d72\u4fa7='+(bH1*2)+'\u4ef6\uff09<br>';
+  if(h2Has)html+='\u2022 3L\u52a0\u5f3a\u7b4b\uff1aD2('+Dh+') + 2\u00d7(Lo+200) = <strong>'+lenH2+'mm</strong>\uff08\u03c6'+h2D+'\uff0c'+bH2+'\u6839/\u4fa7\u00d72\u4fa7='+(bH2*2)+'\u4ef6\uff09<br>';
+  html+='\u2022 2L\u52a0\u5f3a\u7b4b\uff1aD1('+Dw+') + 2\u00d7(Lo+200) = <strong>'+lenV1+'mm</strong>\uff08\u03c6'+v1D+'\uff0c'+bV1+'\u6839/\u4fa7\u00d72\u4fa7='+(bV1*2)+'\u4ef6\uff09<br>';
+  if(v2Has)html+='\u2022 4L\u52a0\u5f3a\u7b4b\uff1aD1('+Dw+') + 2\u00d7(Lo+200) = <strong>'+lenV2+'mm</strong>\uff08\u03c6'+v2D+'\uff0c'+bV2+'\u6839/\u4fa7\u00d72\u4fa7='+(bV2*2)+'\u4ef6\uff09<br>';
+  uBars.forEach(function(u){if(!u.needed)return;html+='\u2022 '+u.label+' U\u5f62\u7b4b\uff1a\u5e95\u957f('+u.bot+') + 2\u00d7\u8fb9\u957f('+u.side+') = <strong>'+u.total+'mm</strong>\uff08\u03c6'+u.uDia+'\uff0c'+u.count+'\u6839\uff09<br>';});
+  if(!isSmallW&&latHDia>0){var lHL=getLaLo(latHDia).La;html+='\u2022 \u6a2a\u5411\u4fa7\u5411\u6784\u9020\u7b4b\uff1aD1('+Dw+') + 2\u00d7La('+lHL+') = <strong>'+(Dw+2*lHL)+'mm</strong>\uff08\u03c6'+latHDia+'\uff09<br>';}
+  if(!isSmallH&&latVDia>0){var lVL=getLaLo(latVDia).La;html+='\u2022 \u7ad6\u5411\u4fa7\u5411\u6784\u9020\u7b4b\uff1aD2('+Dh+') + 2\u00d7La('+lVL+') = <strong>'+(Dh+2*lVL)+'mm</strong>\uff08\u03c6'+latVDia+'\uff09<br>';}
+  html+='</div>';
+  return html;
+}
+
+function calcRect(){
+  var Dw=parseFloat(document.getElementById('m1_dw').value)||0,Dh=parseFloat(document.getElementById('m1_dh').value)||0;
+  var Thk=parseFloat(document.getElementById('m1_thk').value)||400,C=parseFloat(document.getElementById('m1_c').value)||60,S=parseFloat(document.getElementById('m1_s').value)||200;
+  var h1D=parseInt(document.getElementById('m1_h1d').value),h2D=parseInt(document.getElementById('m1_h2d').value),v1D=parseInt(document.getElementById('m1_v1d').value),v2D=parseInt(document.getElementById('m1_v2d').value);
+  if(Dw<=0||Dh<=0){document.getElementById('r1').innerHTML='<div style="color:red;margin-top:10px;">\u8bf7\u8f93\u5165\u6709\u6548\u7684\u6d1e\u53e3\u5c3a\u5bf8</div>';return;}
+  var html='<div class="ri"><div class="rl">\u6d1e\u53e3\u5c3a\u5bf8</div><div class="rv">\u5bbd\u5ea6 <strong>'+Dw+'mm</strong> \u00d7 \u9ad8\u5ea6 <strong>'+Dh+'mm</strong>\uff08D1/D2\u5404\u81ea\u72ec\u7acb\u5224\u65ad\uff09</div></div>';
+  html+=calcReinforcement('r1',Dw,Dh,Thk,C,S,h1D,h2D,v1D,v2D);
+  document.getElementById('r1').innerHTML=html;
+}
+
+function calcCircle(){
+  var D=parseFloat(document.getElementById('m2_d').value)||0;
+  var Thk=parseFloat(document.getElementById('m2_thk').value)||400,C=parseFloat(document.getElementById('m2_c').value)||60,S=parseFloat(document.getElementById('m2_s').value)||200;
+  var h1D=parseInt(document.getElementById('m2_h1d').value),h2D=parseInt(document.getElementById('m2_h2d').value),v1D=parseInt(document.getElementById('m2_v1d').value),v2D=parseInt(document.getElementById('m2_v2d').value);
+  if(D<=0){document.getElementById('r2').innerHTML='<div style="color:red;margin-top:10px;">\u8bf7\u8f93\u5165\u6709\u6548\u7684\u6d1e\u53e3\u76f4\u5f84</div>';return;}
+  var html='<div class="ri"><div class="rl">\u6d1e\u53e3\u76f4\u5f84</div><div class="rv"><strong>'+D+'mm</strong>\uff08\u5706\u5f62\u6d1e\u53e3\uff0c\u6a2a\u5411/\u7ad6\u5411\u5747\u6309D\u5224\u65ad\uff09</div></div>';
+  html+=calcReinforcement('r2',D,D,Thk,C,S,h1D,h2D,v1D,v2D);
+  html+='<div class="placeholder">\u5176\u4ed6\u9644\u52a0\u94a2\u7b4b\uff08\u89c4\u5219\u5f85\u8865\u5145\uff09</div>';
+  document.getElementById('r2').innerHTML=html;
+}
+
+function calcDoor(){
+  var Dw=parseFloat(document.getElementById('m3_dw').value)||0,Dh=parseFloat(document.getElementById('m3_dh').value)||0;
+  var Thk=parseFloat(document.getElementById('m3_thk').value)||400,C=parseFloat(document.getElementById('m3_c').value)||60,S=parseFloat(document.getElementById('m3_s').value)||200;
+  var h1D=parseInt(document.getElementById('m3_h1d').value),h2D=parseInt(document.getElementById('m3_h2d').value),v1D=parseInt(document.getElementById('m3_v1d').value),v2D=parseInt(document.getElementById('m3_v2d').value);
+  if(Dw<=0||Dh<=0){document.getElementById('r3').innerHTML='<div style="color:red;margin-top:10px;">\u8bf7\u8f93\u5165\u6709\u6548\u7684\u6d1e\u53e3\u5c3a\u5bf8</div>';return;}
+  var html='<div class="ri"><div class="rl">\u6d1e\u53e3\u5c3a\u5bf8</div><div class="rv">\u95e8\u4f01\u53e3\uff1a\u5bbd\u5ea6 <strong>'+Dw+'mm</strong> \u00d7 \u9ad8\u5ea6 <strong>'+Dh+'mm</strong>\uff08\u89c4\u5219\u540c\u77e9\u5f62\u6d1e\u53e3\uff09</div></div>';
+  html+=calcReinforcement('r3',Dw,Dh,Thk,C,S,h1D,h2D,v1D,v2D);
+  html+='<div class="placeholder">\u5176\u4ed6\u9644\u52a0\u94a2\u7b4b\uff08\u89c4\u5219\u5f85\u8865\u5145\uff09</div>';
+  document.getElementById('r3').innerHTML=html;
+}
+
+// Service Worker
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
+</script>
+</body>
+</html>
