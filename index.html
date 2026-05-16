@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>墙洞附加筋计算器 v4.1 - 台山核电</title>
+<title>墙洞附加筋计算器 v4.2 - 台山核电</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1e3c72">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -69,7 +69,7 @@ hr.sep{border:none;border-top:1px solid #e0e8f0;margin:16px 0}
 <div class="container">
   <div class="header">
     <div><h1>墙洞附加筋计算器</h1><p>台山核电二期 · 核岛厂房配筋典型大样图</p></div>
-    <div class="ver">v4.1</div>
+    <div class="ver">v4.2</div>
   </div>
   <div class="contact">
     <div class="logo">中振</div>
@@ -150,17 +150,17 @@ hr.sep{border:none;border-top:1px solid #e0e8f0;margin:16px 0}
     <div class="form-group"><label>洞口宽度 D1 (mm)</label><input type="number" id="m3_dw" value="900" min="50" max="3000"></div>
     <div class="form-group"><label>洞口高度 D2 (mm)</label><input type="number" id="m3_dh" value="2100" min="50" max="4000"></div>
   </div>
-  <div class="sec">企口参数（B + E = 墙厚Thk）</div>
+  <div class="sec">企口参数（B + E = 墙厚Thk，任意填两个自动算第三个）</div>
   <div class="form-row">
-    <div class="form-group"><label>企口宽度 B (mm)</label><input type="number" id="m3_b" value="200" min="50" max="1500"></div>
-    <div class="form-group"><label>门框宽度 E (mm)</label><input type="number" id="m3_e" value="200" min="50" max="1500"></div>
+    <div class="form-group"><label>企口宽度 B (mm)</label><input type="number" id="m3_b" value="200" min="50" max="1500" oninput="syncBEThk('b')"></div>
+    <div class="form-group"><label>门框宽度 E (mm)</label><input type="number" id="m3_e" value="200" min="50" max="1500" oninput="syncBEThk('e')"></div>
+    <div class="form-group"><label>墙厚 Thk (mm)</label><input type="number" id="m3_thk" value="400" min="100" max="2000" oninput="syncBEThk('thk')"></div>
     <div class="form-group"><label>企口最外侧附加竖筋到墙竖向主筋的最近间距 D (mm)</label><input type="number" id="m3_gap" value="200" min="50" max="500"></div>
   </div>
   <div class="sec">材料参数</div>
   <div class="form-row">
     <div class="form-group"><label>混凝土等级</label><select id="m3_fc"><option>C30</option><option>C35</option><option>C40</option><option selected>C45</option><option>C50</option></select></div>
     <div class="form-group"><label>保护层 C (mm)</label><select id="m3_c"><option>50</option><option selected>60</option><option>70</option><option>80</option></select></div>
-    <div class="form-group"><label>墙厚 Thk (mm)</label><select id="m3_thk"><option selected>400</option><option>500</option><option>600</option><option>700</option><option>800</option><option>1000</option><option>1200</option><option>1500</option></select></div>
     <div class="form-group"><label>主筋间距 (mm)</label><input type="number" id="m3_s" value="200" min="100" max="300"></div>
   </div>
   <hr class="sep">
@@ -214,6 +214,28 @@ function switchTab(n, ev) {
   for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
   document.getElementById('mod' + n).classList.add('active');
   ev.target.classList.add('active');
+}
+
+// ============================================================
+// B/E/Thk 联动
+// ============================================================
+function syncBEThk(changed) {
+  var bEl = document.getElementById('m3_b');
+  var eEl = document.getElementById('m3_e');
+  var tEl = document.getElementById('m3_thk');
+  var b = parseFloat(bEl.value) || 0;
+  var e = parseFloat(eEl.value) || 0;
+  var t = parseFloat(tEl.value) || 0;
+  if (changed === 'b' && b > 0) {
+    if (e > 0) tEl.value = b + e;
+    else if (t > 0 && t > b) eEl.value = t - b;
+  } else if (changed === 'e' && e > 0) {
+    if (b > 0) tEl.value = b + e;
+    else if (t > 0 && t > e) bEl.value = t - e;
+  } else if (changed === 'thk' && t > 0) {
+    if (b > 0 && t > b) eEl.value = t - b;
+    else if (e > 0 && t > e) bEl.value = t - e;
+  }
 }
 
 // ============================================================
