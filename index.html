@@ -150,6 +150,12 @@ hr.sep{border:none;border-top:1px solid #e0e8f0;margin:16px 0}
     <div class="form-group"><label>洞口宽度 D1 (mm)</label><input type="number" id="m3_dw" value="900" min="50" max="3000"></div>
     <div class="form-group"><label>洞口高度 D2 (mm)</label><input type="number" id="m3_dh" value="2100" min="50" max="4000"></div>
   </div>
+  <div class="sec">企口参数（B + E = 墙厚Thk）</div>
+  <div class="form-row">
+    <div class="form-group"><label>企口宽度 B (mm)</label><input type="number" id="m3_b" value="200" min="50" max="1500"></div>
+    <div class="form-group"><label>门框宽度 E (mm)</label><input type="number" id="m3_e" value="200" min="50" max="1500"></div>
+    <div class="form-group"><label>企口最外侧附加竖筋到墙竖向主筋的最近间距 D (mm)</label><input type="number" id="m3_gap" value="200" min="50" max="500"></div>
+  </div>
   <div class="sec">材料参数</div>
   <div class="form-row">
     <div class="form-group"><label>混凝土等级</label><select id="m3_fc"><option>C30</option><option>C35</option><option>C40</option><option selected>C45</option><option>C50</option></select></div>
@@ -510,13 +516,18 @@ function calcDoor() {
   var h2D = parseInt(document.getElementById('m3_h2d').value);
   var v1D = parseInt(document.getElementById('m3_v1d').value);
   var v2D = parseInt(document.getElementById('m3_v2d').value);
+  var B = parseFloat(document.getElementById('m3_b').value) || 0;
+  var E = parseFloat(document.getElementById('m3_e').value) || 0;
+  var gap = parseFloat(document.getElementById('m3_gap').value) || 0;
 
   if (Dw <= 0 || Dh <= 0) {
     document.getElementById('r3').innerHTML = '<div style="color:red;margin-top:10px;">请输入有效的洞口尺寸</div>';
     return;
   }
 
+  var bCheck = (B + E === Thk);
   var html = '<div class="ri"><div class="rl">洞口尺寸</div><div class="rv">门企口：宽度 <strong>' + Dw + 'mm</strong> \u00d7 高度 <strong>' + Dh + 'mm</strong>（规则同矩形洞口）</div></div>';
+  html += '<div class="ri"><div class="rl">企口参数</div><div class="rv">企口宽度 B=<strong>' + B + 'mm</strong>，门框宽度 E=<strong>' + E + 'mm</strong>，间距 D=<strong>' + gap + 'mm</strong>' + (bCheck ? '' : ' <span style="color:#c62828;">\u26a0 B+E=' + (B+E) + '\u2260Thk(' + Thk + ')</span>') + '</div></div>';
   html += calcReinforcement('r3', Dw, Dh, Thk, C, S, h1D, h2D, v1D, v2D);
   // 预留：其他附加钢筋
   html += '<div class="placeholder">其他附加钢筋（规则待补充）</div>';
