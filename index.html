@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>墙洞附加筋计算器 v4.3 - 台山核电</title>
+<title>墙洞附加筋计算器 v4.4 - 台山核电</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1e3c72">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -69,7 +69,7 @@ hr.sep{border:none;border-top:1px solid #e0e8f0;margin:16px 0}
 <div class="container">
   <div class="header">
     <div><h1>墙洞附加筋计算器</h1><p>台山核电二期 · 核岛厂房配筋典型大样图</p></div>
-    <div class="ver">v4.3</div>
+    <div class="ver">v4.4</div>
   </div>
   <div class="contact">
     <div class="logo">中振</div>
@@ -530,8 +530,8 @@ function calcCircle() {
     var sleeveD = parseFloat(document.getElementById('m2_sleeve_d').value) || 0;
     html += '<div class="rbox" style="border-left-color:#00695c;"><h3 style="color:#00695c;">钢套筒附加筋 — ' + sleeveNames[sleeveType] + '</h3>';
 
-    if (sleeveType === 'plain') {
-      // 无翼缘钢套筒圆洞：环形筋
+    if (sleeveType !== 'none') {
+      // 钢套筒圆洞：环形筋（三种类型环筋规则相同）
       if (sleeveD <= 0) {
         html += '<div class="ri"><div class="rv" style="color:#c62828;">请输入套筒内径D</div></div>';
       } else if (sleeveD <= 150) {
@@ -557,15 +557,17 @@ function calcCircle() {
           '<strong>HPB300 \u03c6' + ringDia + '</strong> \u00d7 <strong>2根</strong>（顶底各1根）<br>' +
           '中心线直径 = 套筒内径(' + sleeveD + ') + 2\u00d7保护层(' + C_val + ') + 2\u00d7U形筋直径(' + uBarD + ') + 2\u00d7环筋直径(' + ringDia + ') = <strong>' + ringCenterDia + 'mm</strong><br>' +
           '周长 = \u03c0 \u00d7 ' + ringCenterDia + ' = <strong>' + ringCircumference + 'mm</strong><br>' +
-          '搭接长度 = 1.4\u00d7La(' + hpbLa + ') = <strong>' + lapLen + 'mm</strong>（搭接面积>50%）<br>' +
+          '搭接长度 = <strong>' + lapLen + 'mm</strong>（查核岛锚固搭接表，搭接面积>50%）<br>' +
           '单根总长 = ' + ringCircumference + ' + ' + lapLen + ' = <strong>' + ringTotal + 'mm</strong></div></div>';
         html += '<div class="hl"><strong>公式：</strong>环筋中心线直径 = D + 2C + 2d(U形筋) + 2d(环筋)；单根总长 = \u03c0\u00d7中心线直径 + 搭接长度</div>';
       }
       // 小U形筋（待补充）
-      html += '<div class="placeholder">小U形筋（规则待补充）</div>';
-    } else {
-      html += '<div class="placeholder">环形筋 + 小U形筋（规则待补充）</div>';
-    }
+      // 小U形筋/小环筋：按钢套筒类型提示
+      if (sleeveType === 'flanged' || sleeveType === 'stiffened') {
+        html += '<div class="placeholder">小U形筋 / 小环筋（规则待补充）</div>';
+      } else {
+        html += '<div class="placeholder">小U形筋（规则待补充）</div>';
+      }
     html += '</div>';
   }
   document.getElementById('r2').innerHTML = html;
