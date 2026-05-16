@@ -120,6 +120,8 @@ hr.sep{border:none;border-top:1px solid #e0e8f0;margin:16px 0}
     <div class="form-group"><label>洞口直径 D (mm)</label><input type="number" id="m2_d" value="300" min="50" max="2000"></div>
     <div class="form-group"><label>钢套筒类型</label><select id="m2_sleeve" onchange="toggleSleeveInput()"><option value="none">普通圆形洞口</option><option value="plain">无翼缘钢套筒圆洞</option><option value="flanged">有翼缘钢套筒圆洞</option><option value="stiffened">带加劲肋钢套筒圆洞</option></select></div>
     <div class="form-group" id="m2_sleeve_d_wrap" style="display:none"><label>套筒内径 D (mm)</label><input type="number" id="m2_sleeve_d" value="200" min="50" max="2000"></div>
+    <div class="form-group" id="m2_sleeve_t_wrap" style="display:none"><label>套筒壁厚 (mm)</label><input type="number" id="m2_sleeve_t" value="8" min="1" max="50"></div>
+    <div class="form-group" id="m2_sleeve_f_wrap" style="display:none"><label>翼缘宽度 (mm)</label><input type="number" id="m2_sleeve_f" value="20" min="0" max="100"></div>
   </div>
   <div class="sec">材料参数</div>
   <div class="form-row">
@@ -256,6 +258,8 @@ function syncBEThk(changed) {
 function toggleSleeveInput() {
   var v = document.getElementById('m2_sleeve').value;
   document.getElementById('m2_sleeve_d_wrap').style.display = (v === 'none') ? 'none' : '';
+  document.getElementById('m2_sleeve_t_wrap').style.display = (v === 'none' || v === 'plain') ? 'none' : '';
+  document.getElementById('m2_sleeve_f_wrap').style.display = (v === 'flanged' || v === 'stiffened') ? '' : 'none';
 }
 
 // ============================================================
@@ -553,24 +557,33 @@ function calcCircle() {
         html += '<div class="ri"><div class="rl">环形筋</div><div class="rv"><strong>不设</strong>（套筒内径D=' + sleeveD + 'mm \u2264 150mm）</div></div>';
       } else {
         // 环形筋计算
-        var ringDia = 10; // HPB300 \u03c610
-        var uBarD = getUBarDia(h1D); // U形筋直径，取外侧横向主筋对应的U形筋直径
+        var ringDia = 10; // HPB300 φ10
+        var uBarD = getUBarDia(h1D);
         var C_val = parseFloat(document.getElementById('m2_c').value) || 60;
-        var ringCenterDia = sleeveD + 2 * C_val + 2 * uBarD + 2 * ringDia;
+        var sleeveT = parseFloat(document.getElementById('m2_sleeve_t').value) || 8;
+        var sleeveF = parseFloat(document.getElementById('m2_sleeve_f').value) || 0;
+        // 无翼缘：套筒内径 + 2×保护层 + 2×U形筋直径 + 2×环筋直径
+        // 有翼缘/带加劲肋：套筒内径 + 2×壁厚 + 2×翼缘宽度 + 2×U形筋直径 + 2×环筋直径
+        var ringCenterDia = (sleeveType === 'plain')
+          ? (sleeveD + 2 * C_val + 2 * uBarD + 2 * ringDia)
+          : (sleeveD + 2 * sleeveT + 2 * sleeveF + 2 * uBarD + 2 * ringDia);
         var ringCircumference = Math.round(Math.PI * ringCenterDia);
-        // HPB300 \u03c610 搭接长度：查核岛锚固搭接表
-        // HPB300 环形筋搭接长度：查核岛锚固搭接表
-        var hpbRow = getLaLo(ringDia); // 统一查表
-        var hpbLa = hpbRow.La;
-        var lapLen = hpbRow.Lo100; // 搭接面积>50%
+        var hpbRow = getLaLo(ringDia);
+        var lapLen = hpbRow.Lo100;
         var ringTotal = ringCircumference + lapLen;
+        var ringTypeName = {plain:'无翼缘钢套筒圆洞',flanged:'有翼缘钢套筒圆洞',stiffened:'带加劲肋钢套筒圆洞'}[sleeveType];
         html += '<div class="ri"><div class="rl">环形筋</div><div class="rv">' +
-          '<strong>HPB300 \u03c6' + ringDia + '</strong> \u00d7 <strong>2根</strong>（顶底各1根）<br>' +
-          '中心线直径 = 套筒内径(' + sleeveD + ') + 2\u00d7保护层(' + C_val + ') + 2\u00d7U形筋直径(' + uBarD + ') + 2\u00d7环筋直径(' + ringDia + ') = <strong>' + ringCenterDia + 'mm</strong><br>' +
-          '周长 = \u03c0 \u00d7 ' + ringCenterDia + ' = <strong>' + ringCircumference + 'mm</strong><br>' +
+          '<strong>HPB300 φ' + ringDia + '</strong> × <strong>2根</strong>（顶底各1根）<br>' +
+          (sleeveType === 'plain'
+            ? ('套筒内径(' + sleeveD + ') + 2×保护层(' + C_val + ') + 2×U形筋直径(' + uBarD + ') + 2×环筋直径(' + ringDia + ')')
+            : ('套筒内径(' + sleeveD + ') + 2×壁厚(' + sleeveT + ') + 2×翼缘宽度(' + sleeveF + ') + 2×U形筋直径(' + uBarD + ') + 2×环筋直径(' + ringDia + ')')) +
+          ' = <strong>' + ringCenterDia + 'mm</strong><br>' +
+          '周长 = π × ' + ringCenterDia + ' = <strong>' + ringCircumference + 'mm</strong><br>' +
           '搭接长度 = <strong>' + lapLen + 'mm</strong>（查核岛锚固搭接表，搭接面积>50%）<br>' +
           '单根总长 = ' + ringCircumference + ' + ' + lapLen + ' = <strong>' + ringTotal + 'mm</strong></div></div>';
-        html += '<div class="hl"><strong>公式：</strong>环筋中心线直径 = D + 2C + 2d(U形筋) + 2d(环筋)；单根总长 = \u03c0\u00d7中心线直径 + 搭接长度</div>';
+        var ringFormula = (sleeveType === 'plain')
+          ? '环筋中心线直径 = 套筒内径D + 2×保护层 + 2×U形筋直径 + 2×环筋直径；单根总长 = π×中心线直径 + 搭接长度'
+          : '环筋中心线直径 = 套筒内径D + 2×套筒壁厚 + 2×翼缘宽度 + 2×U形筋直径 + 2×环筋直径；单根总长 = π×中心线直径 + 搭接长度';
       }
       // U形放射筋/小环筋：仅翼缘和加劲肋类型
       if (sleeveType === 'flanged' || sleeveType === 'stiffened') {
