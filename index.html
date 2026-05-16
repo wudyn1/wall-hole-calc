@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>墙洞附加筋计算器 v4.0 - 台山核电</title>
+<title>墙洞附加筋计算器 v4.1 - 台山核电</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1e3c72">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -69,7 +69,7 @@ hr.sep{border:none;border-top:1px solid #e0e8f0;margin:16px 0}
 <div class="container">
   <div class="header">
     <div><h1>墙洞附加筋计算器</h1><p>台山核电二期 · 核岛厂房配筋典型大样图</p></div>
-    <div class="ver">v4.0</div>
+    <div class="ver">v4.1</div>
   </div>
   <div class="contact">
     <div class="logo">中振</div>
@@ -118,6 +118,7 @@ hr.sep{border:none;border-top:1px solid #e0e8f0;margin:16px 0}
   <div class="sec">洞口尺寸</div>
   <div class="form-row">
     <div class="form-group"><label>洞口直径 D (mm)</label><input type="number" id="m2_d" value="300" min="50" max="2000"></div>
+    <div class="form-group"><label>钢套筒类型</label><select id="m2_sleeve"><option value="none">普通圆形洞口</option><option value="plain">无翼缘钢套筒圆洞</option><option value="flanged">有翼缘钢套筒圆洞</option><option value="stiffened">带加劲肋钢套筒圆洞</option></select></div>
   </div>
   <div class="sec">材料参数</div>
   <div class="form-row">
@@ -484,8 +485,15 @@ function calcCircle() {
   // 圆形洞口：Dw=Dh=D，两个方向截断数相同
   var html = '<div class="ri"><div class="rl">洞口直径</div><div class="rv"><strong>' + D + 'mm</strong>（圆形洞口，横向/竖向均按D判断）</div></div>';
   html += calcReinforcement('r2', D, D, Thk, C, S, h1D, h2D, v1D, v2D);
-  // 预留：其他附加钢筋
-  html += '<div class="placeholder">其他附加钢筋（规则待补充）</div>';
+
+  // 钢套筒圆洞：环形筋 + 小U形筋
+  var sleeveType = document.getElementById('m2_sleeve').value;
+  if (sleeveType !== 'none') {
+    var sleeveNames = {plain:'无翼缘钢套筒圆洞', flanged:'有翼缘钢套筒圆洞', stiffened:'带加劲肋钢套筒圆洞'};
+    html += '<div class="rbox" style="border-left-color:#00695c;"><h3 style="color:#00695c;">钢套筒附加筋 — ' + sleeveNames[sleeveType] + '</h3>';
+    html += '<div class="placeholder">环形筋 + 小U形筋（规则待补充）</div>';
+    html += '</div>';
+  }
   document.getElementById('r2').innerHTML = html;
 }
 
