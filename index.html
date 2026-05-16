@@ -530,7 +530,6 @@ function calcCircle() {
     var sleeveD = parseFloat(document.getElementById('m2_sleeve_d').value) || 0;
     html += '<div class="rbox" style="border-left-color:#00695c;"><h3 style="color:#00695c;">钢套筒附加筋 — ' + sleeveNames[sleeveType] + '</h3>';
 
-    if (sleeveType !== 'none') {
       // 钢套筒圆洞：环形筋（三种类型环筋规则相同）
       if (sleeveD <= 0) {
         html += '<div class="ri"><div class="rv" style="color:#c62828;">请输入套筒内径D</div></div>';
