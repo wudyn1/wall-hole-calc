@@ -586,31 +586,8 @@ function calcCircle() {
 // 门企口
 // ============================================================
 function calcDoor() {
-  var Dw = parseFloat(document.getElementById('m3_dw').value) || 0;
-  var Dh = parseFloat(document.getElementById('m3_dh').value) || 0;
-  var Thk = parseFloat(document.getElementById('m3_thk').value) || 400;
-  var C = parseFloat(document.getElementById('m3_c').value) || 60;
-  var S = parseFloat(document.getElementById('m3_s').value) || 200;
-  var h1D = parseInt(document.getElementById('m3_h1d').value);
-  var h2D = parseInt(document.getElementById('m3_h2d').value);
-  var v1D = parseInt(document.getElementById('m3_v1d').value);
-  var v2D = parseInt(document.getElementById('m3_v2d').value);
-  var B = parseFloat(document.getElementById('m3_b').value) || 0;
-  var E = parseFloat(document.getElementById('m3_e').value) || 0;
-  var gap = parseFloat(document.getElementById('m3_gap').value) || 0;
-
-  if (Dw <= 0 || Dh <= 0) {
-    document.getElementById('r3').innerHTML = '<div style="color:red;margin-top:10px;">请输入有效的洞口尺寸</div>';
-    return;
-  }
-
-  var bCheck = (B + E === Thk);
-  var html = '<div class="ri"><div class="rl">洞口尺寸</div><div class="rv">门企口：宽度 <strong>' + Dw + 'mm</strong> \u00d7 高度 <strong>' + Dh + 'mm</strong>（规则同矩形洞口）</div></div>';
-  html += '<div class="ri"><div class="rl">企口参数</div><div class="rv">企口宽度 B=<strong>' + B + 'mm</strong>，门框宽度 E=<strong>' + E + 'mm</strong>，间距 D=<strong>' + gap + 'mm</strong>' + (bCheck ? '' : ' <span style="color:#c62828;">\u26a0 B+E=' + (B+E) + '\u2260Thk(' + Thk + ')</span>') + '</div></div>';
-  html += calcReinforcement('r3', Dw, Dh, Thk, C, S, h1D, h2D, v1D, v2D);
-  // 预留：其他附加钢筋
-  html += '<div class="placeholder">其他附加钢筋（规则待补充）</div>';
-  document.getElementById('r3').innerHTML = html;
+  document.getElementById('r3').innerHTML = '<div style="color:#c62828;margin-top:10px;font-size:16px;"><strong>⚠ 门企口模块暂未开放</strong><br>规则待确认，暂停使用，以免计算有误。</div>';
+  return;
 }
 
 // Service Worker
