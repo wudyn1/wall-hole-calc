@@ -118,7 +118,8 @@ hr.sep{border:none;border-top:1px solid #e0e8f0;margin:16px 0}
   <div class="sec">洞口尺寸</div>
   <div class="form-row">
     <div class="form-group"><label>洞口直径 D (mm)</label><input type="number" id="m2_d" value="300" min="50" max="2000"></div>
-    <div class="form-group"><label>钢套筒类型</label><select id="m2_sleeve"><option value="none">普通圆形洞口</option><option value="plain">无翼缘钢套筒圆洞</option><option value="flanged">有翼缘钢套筒圆洞</option><option value="stiffened">带加劲肋钢套筒圆洞</option></select></div>
+    <div class="form-group"><label>钢套筒类型</label><select id="m2_sleeve" onchange="toggleSleeveInput()"><option value="none">普通圆形洞口</option><option value="plain">无翼缘钢套筒圆洞</option><option value="flanged">有翼缘钢套筒圆洞</option><option value="stiffened">带加劲肋钢套筒圆洞</option></select></div>
+    <div class="form-group" id="m2_sleeve_d_wrap" style="display:none"><label>套筒内径 D (mm)</label><input type="number" id="m2_sleeve_d" value="200" min="50" max="2000"></div>
   </div>
   <div class="sec">材料参数</div>
   <div class="form-row">
@@ -236,6 +237,14 @@ function syncBEThk(changed) {
     if (b > 0 && t > b) eEl.value = t - b;
     else if (e > 0 && t > e) bEl.value = t - e;
   }
+}
+
+// ============================================================
+// 钢套筒内径输入框显示/隐藏
+// ============================================================
+function toggleSleeveInput() {
+  var v = document.getElementById('m2_sleeve').value;
+  document.getElementById('m2_sleeve_d_wrap').style.display = (v === 'none') ? 'none' : '';
 }
 
 // ============================================================
@@ -518,8 +527,40 @@ function calcCircle() {
   var sleeveType = document.getElementById('m2_sleeve').value;
   if (sleeveType !== 'none') {
     var sleeveNames = {plain:'无翼缘钢套筒圆洞', flanged:'有翼缘钢套筒圆洞', stiffened:'带加劲肋钢套筒圆洞'};
+    var sleeveD = parseFloat(document.getElementById('m2_sleeve_d').value) || 0;
     html += '<div class="rbox" style="border-left-color:#00695c;"><h3 style="color:#00695c;">钢套筒附加筋 — ' + sleeveNames[sleeveType] + '</h3>';
-    html += '<div class="placeholder">环形筋 + 小U形筋（规则待补充）</div>';
+
+    if (sleeveType === 'plain') {
+      // 无翼缘钢套筒圆洞：环形筋
+      if (sleeveD <= 0) {
+        html += '<div class="ri"><div class="rv" style="color:#c62828;">请输入套筒内径D</div></div>';
+      } else if (sleeveD <= 150) {
+        html += '<div class="ri"><div class="rl">环形筋</div><div class="rv"><strong>不设</strong>（套筒内径D=' + sleeveD + 'mm \u2264 150mm）</div></div>';
+      } else {
+        // 环形筋计算
+        var ringDia = 10; // HPB300 \u03c610
+        var uBarD = getUBarDia(h1D); // U形筋直径，取外侧横向主筋对应的U形筋直径
+        var C_val = parseFloat(document.getElementById('m2_c').value) || 60;
+        var ringCenterDia = sleeveD + 2 * C_val + 2 * uBarD + 2 * ringDia;
+        var ringCircumference = Math.round(Math.PI * ringCenterDia);
+        // HPB300 \u03c610 搭接长度：C45混凝土，搭接面积>50%，按1.4*La计算
+        // HPB300在C45下La\u224825d=250mm，搭接>50%按1.4\u00d7250=350mm
+        var hpbLa = Math.round(25 * ringDia); // 250mm
+        var lapLen = Math.round(1.4 * hpbLa); // 350mm
+        var ringTotal = ringCircumference + lapLen;
+        html += '<div class="ri"><div class="rl">环形筋</div><div class="rv">' +
+          '<strong>HPB300 \u03c6' + ringDia + '</strong> \u00d7 <strong>2根</strong>（顶底各1根）<br>' +
+          '中心线直径 = 套筒内径(' + sleeveD + ') + 2\u00d7保护层(' + C_val + ') + 2\u00d7U形筋直径(' + uBarD + ') + 2\u00d7环筋直径(' + ringDia + ') = <strong>' + ringCenterDia + 'mm</strong><br>' +
+          '周长 = \u03c0 \u00d7 ' + ringCenterDia + ' = <strong>' + ringCircumference + 'mm</strong><br>' +
+          '搭接长度 = 1.4\u00d7La(' + hpbLa + ') = <strong>' + lapLen + 'mm</strong>（搭接面积>50%）<br>' +
+          '单根总长 = ' + ringCircumference + ' + ' + lapLen + ' = <strong>' + ringTotal + 'mm</strong></div></div>';
+        html += '<div class="hl"><strong>公式：</strong>环筋中心线直径 = D + 2C + 2d(U形筋) + 2d(环筋)；单根总长 = \u03c0\u00d7中心线直径 + 搭接长度</div>';
+      }
+      // 小U形筋（待补充）
+      html += '<div class="placeholder">小U形筋（规则待补充）</div>';
+    } else {
+      html += '<div class="placeholder">环形筋 + 小U形筋（规则待补充）</div>';
+    }
     html += '</div>';
   }
   document.getElementById('r2').innerHTML = html;
