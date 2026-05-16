@@ -452,7 +452,7 @@ function calcReinforcement(prefix, Dw, Dh, Thk, C, spacing, h1D, h2D, v1D, v2D) 
     } else {
       var latHLa = getLaLo(latHDia).La;
       var latHLen = Dw + 2 * latHLa;
-      html += '<div class="ri"><div class="rl">横向（沿D1边）</div><div class="rv"><strong>\u03c6' + latHDia + '</strong>（D1=' + Dw + 'mm，' + (Dw < 500 ? '300<D<500\u2192\u03c620' : 'D\u2265500\u2192同主筋') + '）<br>单根总长 = ' + Dw + ' + 2\u00d7La(' + latHLa + ') = <strong>' + latHLen + 'mm</strong></div></div>';
+      html += '<div class="ri"><div class="rl">横向（沿D1边）</div><div class="rv"><strong>\u03c6' + latHDia + '</strong>（D1=' + Dw + 'mm）<br>单根总长 = ' + Dw + ' + 2\u00d7La(' + latHLa + ') = <strong>' + latHLen + 'mm</strong></div></div>';
     }
 
     // 竖向侧向构造筋
@@ -461,7 +461,7 @@ function calcReinforcement(prefix, Dw, Dh, Thk, C, spacing, h1D, h2D, v1D, v2D) 
     } else {
       var latVLa = getLaLo(latVDia).La;
       var latVLen = Dh + 2 * latVLa;
-      html += '<div class="ri"><div class="rl">竖向（沿D2边）</div><div class="rv"><strong>\u03c6' + latVDia + '</strong>（D2=' + Dh + 'mm，' + (Dh < 500 ? '300<D<500\u2192\u03c620' : 'D\u2265500\u2192同主筋') + '）<br>单根总长 = ' + Dh + ' + 2\u00d7La(' + latVLa + ') = <strong>' + latVLen + 'mm</strong></div></div>';
+      html += '<div class="ri"><div class="rl">竖向（沿D2边）</div><div class="rv"><strong>\u03c6' + latVDia + '</strong>（D2=' + Dh + 'mm）<br>单根总长 = ' + Dh + ' + 2\u00d7La(' + latVLa + ') = <strong>' + latVLen + 'mm</strong></div></div>';
     }
 
     html += '<div class="hl"><strong>公式：</strong>单根总长 = 本方向尺寸 + 2\u00d7La，La查锚固搭接表。</div>';
