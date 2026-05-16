@@ -186,16 +186,18 @@ hr.sep{border:none;border-top:1px solid #e0e8f0;margin:16px 0}
 // ============================================================
 // 核岛锚固搭接数据表（C45 / HRB400E）
 // ============================================================
-// 核岛锚固搭接表（C45混凝土，HRB400E）
+// 核岛锚固搭接表（C45混凝土）—— 按项目规范表
+// 格式：{La: 锚固长度, Lo50: 搭接面积≤50%, Lo100: 搭接面积>50%}
 var anchData = {
-  12:{La:391,Lo50:469,Lo100:563}, 14:{La:456,Lo50:547,Lo100:656},
-  16:{La:521,Lo50:625,Lo100:750}, 18:{La:586,Lo50:703,Lo100:844},
-  20:{La:651,Lo50:781,Lo100:937}, 22:{La:716,Lo50:859,Lo100:1031},
-  25:{La:814,Lo50:977,Lo100:1172}, 28:{La:913,Lo50:1096,Lo100:1315},
-  32:{La:1042,Lo50:1250,Lo100:1500}, 36:{La:1172,Lo50:1406,Lo100:1687}
+  // HRB400E
+  8:{La:300,Lo50:400,Lo100:450}, 10:{La:350,Lo50:500,Lo100:550},
+  12:{La:400,Lo50:600,Lo100:650}, 14:{La:500,Lo50:650,Lo100:750},
+  16:{La:550,Lo50:750,Lo100:850}, 20:{La:700,Lo50:950,Lo100:1100},
+  25:{La:850,Lo50:1200,Lo100:1350}, 32:{La:1200,Lo50:1700,Lo100:1900},
+  40:{La:1500,Lo50:2100,Lo100:2400}
 };
-// HPB300 核岛锚固搭接表（C45混凝土）
 var hpbAnchData = {
+  // HPB300 (C45)
   6:{La:200,Lo50:250,Lo100:300}, 8:{La:250,Lo50:350,Lo100:400},
   10:{La:300,Lo50:450,Lo100:500}, 12:{La:350,Lo50:500,Lo100:600},
   14:{La:450,Lo50:600,Lo100:650}, 16:{La:500,Lo50:650,Lo100:750}
@@ -209,10 +211,8 @@ function nearestKey(d, tbl) {
 }
 
 function getLaLo(d) {
-  var k = nearestKey(d, anchData);
-  if (anchData[k]) return anchData[k];
-  var k2 = nearestKey(d, hpbAnchData);
-  if (hpbAnchData[k2]) return hpbAnchData[k2];
+  if (anchData[d]) return anchData[d];
+  if (hpbAnchData[d]) return hpbAnchData[d];
   return {La:0, Lo50:0, Lo100:0}; // 不存在则返回0，不猜测
 }
 
@@ -272,10 +272,9 @@ function getReinCount(cutCount, isSmall) {
   return isSmall ? 1 : Math.ceil(cutCount / 2);
 }
 
-// U形筋边长中的La：统一查锚固搭接表
-function getUBarLa(d) {
-  var row = getLaLo(d);
-  return row.La;
+// U形筋边长平直段：固定40倍d
+function getUBarStraightLen(d) {
+  return 40 * d;
 }
 
 /** U形筋直径 */
@@ -326,16 +325,16 @@ function calcReinforcement(prefix, Dw, Dh, Thk, C, spacing, h1D, h2D, v1D, v2D) 
   var cH = getCutCount(Dh, spacing);
   var bH1 = getReinCount(cH, isSmallH);
   var bH2 = h2Has ? getReinCount(cH, isSmallH) : 0;
-  var extH1 = getLaLo(h1D).Lo50 + 200;
-  var extH2 = h2Has ? getLaLo(h2D).Lo50 + 200 : 0;
+  var extH1 = getLaLo(h1D).Lo100 + 200;
+  var extH2 = h2Has ? getLaLo(h2D).Lo100 + 200 : 0;
   var lenH1 = Dh + 2 * extH1;
   var lenH2 = h2Has ? Dh + 2 * extH2 : 0;
 
   var cV = getCutCount(Dw, spacing);
   var bV1 = getReinCount(cV, isSmallW);
   var bV2 = v2Has ? getReinCount(cV, isSmallW) : 0;
-  var extV1 = getLaLo(v1D).Lo50 + 200;
-  var extV2 = v2Has ? getLaLo(v2D).Lo50 + 200 : 0;
+  var extV1 = getLaLo(v1D).Lo100 + 200;
+  var extV2 = v2Has ? getLaLo(v2D).Lo100 + 200 : 0;
   var lenV1 = Dw + 2 * extV1;
   var lenV2 = v2Has ? Dw + 2 * extV2 : 0;
 
@@ -345,45 +344,45 @@ function calcReinforcement(prefix, Dw, Dh, Thk, C, spacing, h1D, h2D, v1D, v2D) 
     // 1L U形筋
     var u1d = getUBarDia(h1D);
     var u1Dm = getPinDm(u1d);
-    var u1La = getLaLo(u1d).La;
+    var u1Str = getUBarStraightLen(u1d);
     var u1Arc = Math.round(u1Dm / 2 + u1d);
-    var u1Side = u1La + u1Arc;
+    var u1Side = u1Str + u1Arc;
     var u1Bot = Math.round(Thk - 2 * C);
     var u1Total = u1Bot + 2 * u1Side;
-    uBars.push({label:'1L（外侧横向）', mainD:h1D, uDia:u1d, uDm:u1Dm, uLa:u1La, arc:u1Arc, side:u1Side, bot:u1Bot, total:u1Total, count:cH, dir:'横向', needed:!isSmallH});
+    uBars.push({label:'1L（外侧横向）', mainD:h1D, uDia:u1d, uDm:u1Dm, uStr:u1Str, arc:u1Arc, side:u1Side, bot:u1Bot, total:u1Total, count:cH, dir:'横向', needed:!isSmallH});
 
     // 2L U形筋
     var u2d = getUBarDia(v1D);
     var u2Dm = getPinDm(u2d);
-    var u2La = getLaLo(u2d).La;
+    var u2Str = getUBarStraightLen(u2d);
     var u2Arc = Math.round(u2Dm / 2 + u2d);
-    var u2Side = u2La + u2Arc;
+    var u2Side = u2Str + u2Arc;
     var u2Bot = Math.round(Thk - 2 * C - 2 * h1D);
     var u2Total = u2Bot + 2 * u2Side;
-    uBars.push({label:'2L（外侧竖向）', mainD:v1D, uDia:u2d, uDm:u2Dm, uLa:u2La, arc:u2Arc, side:u2Side, bot:u2Bot, total:u2Total, count:cV, dir:'竖向', needed:!isSmallW});
+    uBars.push({label:'2L（外侧竖向）', mainD:v1D, uDia:u2d, uDm:u2Dm, uStr:u2Str, arc:u2Arc, side:u2Side, bot:u2Bot, total:u2Total, count:cV, dir:'竖向', needed:!isSmallW});
 
     // 3L U形筋
     if (h2Has) {
       var u3d = getUBarDia(h2D);
       var u3Dm = getPinDm(u3d);
-      var u3La = getLaLo(u3d).La;
+      var u3Str = getUBarStraightLen(u3d);
       var u3Arc = Math.round(u3Dm / 2 + u3d);
-      var u3Side = u3La + u3Arc;
+      var u3Side = u3Str + u3Arc;
       var u3Bot = Math.round(Thk - 2 * C - 2 * h1D - 2 * v1D);
       var u3Total = u3Bot + 2 * u3Side;
-      uBars.push({label:'3L（内侧横向）', mainD:h2D, uDia:u3d, uDm:u3Dm, uLa:u3La, arc:u3Arc, side:u3Side, bot:u3Bot, total:u3Total, count:cH, dir:'横向', needed:!isSmallH});
+      uBars.push({label:'3L（内侧横向）', mainD:h2D, uDia:u3d, uDm:u3Dm, uStr:u3Str, arc:u3Arc, side:u3Side, bot:u3Bot, total:u3Total, count:cH, dir:'横向', needed:!isSmallH});
     }
 
     // 4L U形筋
     if (v2Has) {
       var u4d = getUBarDia(v2D);
       var u4Dm = getPinDm(u4d);
-      var u4La = getLaLo(u4d).La;
+      var u4Str = getUBarStraightLen(u4d);
       var u4Arc = Math.round(u4Dm / 2 + u4d);
-      var u4Side = u4La + u4Arc;
+      var u4Side = u4Str + u4Arc;
       var u4Bot = Math.round(Thk - 2 * C - 2 * h1D - 2 * v1D - 2 * (h2Has ? h2D : 0));
       var u4Total = u4Bot + 2 * u4Side;
-      uBars.push({label:'4L（内侧竖向）', mainD:v2D, uDia:u4d, uDm:u4Dm, uLa:u4La, arc:u4Arc, side:u4Side, bot:u4Bot, total:u4Total, count:cV, dir:'竖向', needed:!isSmallW});
+      uBars.push({label:'4L（内侧竖向）', mainD:v2D, uDia:u4d, uDm:u4Dm, uStr:u4Str, arc:u4Arc, side:u4Side, bot:u4Bot, total:u4Total, count:cV, dir:'竖向', needed:!isSmallW});
     }
   }
 
@@ -418,7 +417,7 @@ function calcReinforcement(prefix, Dw, Dh, Thk, C, spacing, h1D, h2D, v1D, v2D) 
     html += '<tr><td>4L（内侧竖向）</td><td><span class="phi">\u03c6' + v2D + '</span></td><td>' + cV + '</td><td>' + bV2 + '根/侧</td><td>' + (bV2*2) + '件</td><td>' + extV2 + 'mm</td><td><strong>' + lenV2 + 'mm</strong></td></tr>';
   }
   html += '</table>';
-  html += '<div class="hl"><strong>公式：</strong>单根总长 = 本边尺寸 + 2\u00d7(Lo+200)，Lo查锚固搭接表。直径同被截断侧主筋。</div>';
+  html += '<div class="hl"><strong>公式：</strong>单根总长 = 本边尺寸 + 2\u00d7(Lo+200)，Lo查锚固搭接表（搭接面积>50%）。直径同被截断侧主筋。</div>';
   html += '</div>';
 
   // ---- U形筋 ----
@@ -431,11 +430,11 @@ function calcReinforcement(prefix, Dw, Dh, Thk, C, spacing, h1D, h2D, v1D, v2D) 
       var diaDesc = u.mainD >= 32 ? '主筋\u2265\u03c632\u2192\u03c620' : (u.mainD >= 16 ? '主筋\u2265\u03c616\u2192\u03c616' : '主筋<\u03c616\u2192同主筋');
       html += '<div class="ri"><div class="rl">' + u.label + '</div><div class="rv">' +
         '<strong>\u03c6' + u.uDia + '</strong>（' + diaDesc + '）· <strong>' + u.count + '根</strong><br>' +
-        '边长 = La(' + u.uLa + ') + 弯弧(Dm/2+d=' + u.arc + ') = <strong>' + u.side + 'mm</strong><br>' +
+        '边长 = 40d(' + u.uStr + ') + 弯弧(Dm/2+d=' + u.arc + ') = <strong>' + u.side + 'mm</strong><br>' +
         '底长 = <strong>' + u.bot + 'mm</strong><br>' +
         '总长 = ' + u.bot + ' + 2\u00d7' + u.side + ' = <strong>' + u.total + 'mm</strong></div></div>';
     });
-    html += '<div class="hl"><strong>公式：</strong>总长 = 底长 + 2\u00d7边长，边长 = La + Dm/2 + d。底长递减：1L=Thk-2C，2L再减2\u00d7d(1L)，以此类推。</div>';
+    html += '<div class="hl"><strong>公式：</strong>总长 = 底长 + 2\u00d7边长，边长 = 40d + Dm/2 + d（平直段固定40d）。底长递减：1L=Thk-2C，2L再减2\u00d7d(1L)，以此类推。</div>';
   }
   html += '</div>';
 
